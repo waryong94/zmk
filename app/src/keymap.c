@@ -709,6 +709,7 @@ int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pr
         zmk_keymap_active_behavior_layer[position] = _zmk_keymap_layer_state;
     }
 
+    // 상위 레이어부터 하위로 처리
     for (int layer_idx = ZMK_KEYMAP_LAYERS_LEN - 1;
          layer_idx >= LAYER_ID_TO_INDEX(_zmk_keymap_layer_default); layer_idx--) {
 
@@ -726,7 +727,7 @@ int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pr
             if (ret > 0) {
                 if (layer_id == 1) {
                     zmk_keymap_layer_deactivate(1);
-                    LOG_DBG("behavior processing deactive layer : %d ret : %d",layer, ret);
+                    LOG_DBG("Layer 1 handled key — deactivating mouse layer 1");
                 }
 
                 LOG_DBG("Behavior processed, continuing to next layer");
@@ -742,6 +743,7 @@ int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pr
 
     return -ENOTSUP;
 }
+
 
 
 #if ZMK_KEYMAP_HAS_SENSORS
