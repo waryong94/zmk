@@ -725,7 +725,7 @@ int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pr
 
             if (ret > 0) {
                 if (layer_id == 1) {
-                    zmk_keymap_layer_deactivate(layer);
+                    zmk_keymap_layer_deactivate(1);
                     LOG_DBG("behavior processing deactive layer : %d ret : %d",layer, ret);
                 }
 
