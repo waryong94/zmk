@@ -704,26 +704,32 @@ int zmk_keymap_apply_position_state(uint8_t source, zmk_keymap_layer_id_t layer_
     return zmk_behavior_invoke_binding(binding, event, pressed);
 }
 
-int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pressed,
-                                      int64_t timestamp) {
+int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pressed, int64_t timestamp) {
     if (pressed) {
         zmk_keymap_active_behavior_layer[position] = _zmk_keymap_layer_state;
     }
 
-    // We use int here to be sure we don't loop layer_idx back to UINT8_MAX
     for (int layer_idx = ZMK_KEYMAP_LAYERS_LEN - 1;
          layer_idx >= LAYER_ID_TO_INDEX(_zmk_keymap_layer_default); layer_idx--) {
+
         zmk_keymap_layer_id_t layer_id = LAYER_INDEX_TO_ID(layer_idx);
 
         if (layer_id == ZMK_KEYMAP_LAYER_ID_INVAL) {
             continue;
         }
+
         if (zmk_keymap_layer_active_with_state(layer_id,
                                                zmk_keymap_active_behavior_layer[position])) {
-            int ret =
-                zmk_keymap_apply_position_state(source, layer_id, position, pressed, timestamp);
+
+            int ret = zmk_keymap_apply_position_state(source, layer_id, position, pressed, timestamp);
+
             if (ret > 0) {
-                LOG_DBG("behavior processing to continue to next layer");
+                if (layer_id == 1) {
+                    zmk_keymap_layer_deactivate(1);
+                    LOG_DBG("Layer 1 handled key — deactivating mouse layer 1");
+                }
+
+                LOG_DBG("Behavior processed, continuing to next layer");
                 continue;
             } else if (ret < 0) {
                 LOG_DBG("Behavior returned error: %d", ret);
@@ -736,6 +742,7 @@ int zmk_keymap_position_state_changed(uint8_t source, uint32_t position, bool pr
 
     return -ENOTSUP;
 }
+
 
 #if ZMK_KEYMAP_HAS_SENSORS
 int zmk_keymap_sensor_event(uint8_t sensor_index,
